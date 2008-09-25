@@ -22,7 +22,7 @@ Version 0.01
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -52,7 +52,7 @@ Here's a little a code snippet:
 
 Serializes C<$target_class> in-memory state (actually, symbol table entries) 
 into perl code and returns it as a string. It will also try to detect possible
-dependencies and they'll try to be honored by being C<require()>d inside the
+dependencies and try to honor them through C<require> statements in the
 generated code.
 
 =cut
@@ -187,7 +187,6 @@ L<http://annocpan.org/dist/Class-Serializer>
 
 L<http://cpanratings.perl.org/d/Class-Serializer>
 
-
 =item * Search CPAN
 
 L<http://search.cpan.org/dist/Class-Serializer>
@@ -200,7 +199,7 @@ L<Data::Dumper>, L<B::Deparse>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2006 Nilson Santos Figueiredo Júnior, all rights reserved.
+Copyright 2008 Nilson Santos Figueiredo Júnior, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

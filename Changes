@@ -1,5 +1,8 @@
 Revision history for Class-Serializer
 
+0.02    Wed Sep 24 23:26:54 2008
+        Test cases should hopefully pass again on recent perl versions.
+
 0.01    Sat Mar 18 03:24:35 2006
         First public version.
 
