@@ -5,12 +5,7 @@ use strict;
 
 # no imports, thanks
 use File::Path ();
-use Data::Dumper ();
-
-# try to emit the most reliable code possible, with *some* indentation
-$Data::Dumper::Deparse = 1;
-$Data::Dumper::Purity  = 1;
-$Data::Dumper::Indent  = 1;
+use Data::Dump::Streamer ();
 
 =head1 NAME
 
@@ -18,21 +13,23 @@ Class::Serializer - Serializes the in-memory state of a class into code
 
 =head1 VERSION
 
-Version 0.01
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
 This module does its best efforts to serialize the in-memory state of a class
 into runable code. For this to actually happen successfully it relies heavily
-on L<Data::Dumper> which, in turn, relies on L<B::Deparse> for CODEREF 
-deparsing. 
+on L<Data::Dump::Streamer> which, in turn, relies on L<B::Deparse> for 
+CODEREF deparsing and other similar tasks. 
 
-B<The most important thing, however, is to keep in mind that this module is highly
-experimental. There are no guarantees whatsoever about the generated code.>
+B<Please, keep in mind that this module is experimental. 
+There are no guarantees whatsoever about the generated code.>
+
+With that said, it should work just fine.
 
 Here's a little a code snippet:
 
@@ -68,14 +65,14 @@ sub as_string {
 		for my $type (qw|SCALAR ARRAY HASH CODE|) {
 			if (*{$contents}{$type}) {
 				next if ($type eq 'SCALAR' && !defined ${*{$contents}{$type}});
-				push(@{$seen{$type}}, ["${target}::$entry", *{$contents}{$type}]);
+				push(@{$seen{$type}}, ["$entry", *{$contents}{$type}]);
 			}
 		}
 	};
 	
 	use strict 'refs';
 	
-	# builds up something suitable to be spoon fed to Data::Dumper
+	# builds up something suitable to be spoon fed to the dumper
 	my (@dump, @names);
 	for my $type (qw|ARRAY HASH CODE|) {
 		for my $entry (@{$seen{$type}}) {
@@ -90,7 +87,10 @@ sub as_string {
 		push(@names, '$'.$entry->[0]);
 	}
 
-	my $dump = Data::Dumper->Dump([@dump], [@names]) . ';1;';
+	my $dump = 
+        "package $target;\n" . 
+        Data::Dump::Streamer::DumpVars( map { $names[$_], $dump[$_] } 0..$#dump )->Declare(1)->Out() . 
+        ';1;';
 
 	my %required = ($target => 1);
 	# tries to detect dependencies and loads them through eval 'require Pkg'
@@ -160,9 +160,8 @@ sub _croak {
 
 The dependency detecting code is pretty simple and may be not very reliable.
 
-This currently doesn't work for classes that keep a lot of lexical data such as
-closures or inside-out objects. This problem is hard to solve since heavy XS 
-magic will probably be needed.
+Closures should work just fine as of version 0.03. This feature wasn't tested
+extensively, though (it just relies on L<Data::Dump::Streamer> for that).
 
 =head1 AUTHOR
 
@@ -195,7 +194,7 @@ L<http://search.cpan.org/dist/Class-Serializer>
 
 =head1 SEE ALSO
 
-L<Data::Dumper>, L<B::Deparse>
+L<Data::Dump::Streamer>, L<B::Deparse>
 
 =head1 COPYRIGHT & LICENSE
 
